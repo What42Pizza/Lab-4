@@ -1,0 +1,1 @@
+g++ -Wall -Wextra -std=c++14 main.cpp -o "build/lab 4.exe"; ./build/"Lab 4.exe"
