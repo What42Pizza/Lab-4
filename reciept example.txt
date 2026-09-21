@@ -1,0 +1,6 @@
+Item            Code  Quantity    Price   Unit Price
+Something       c     3           6.00    2.00
+
+----------------------------------------------------
+Discount                          0.60
+Total                             5.40
