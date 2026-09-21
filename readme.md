@@ -1,4 +1,4 @@
 # Students:
 
-Jonathan Burg
-Jordan Johnson
+- Jonathan Burg
+- Jordan Johnson
