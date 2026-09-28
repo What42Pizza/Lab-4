@@ -133,23 +133,53 @@ int main() {
 	
 	double discount = 0.0;
 	if (isMember) discount = subtotal * MEMBER_DISCOUNT;
-	double total = subtotal - discount;
+	double afterMembership = subtotal - discount;
 
 	double arkansasStateTax = subtotal * (ARKANSAS_STATE_TAX / 100.0);
 	double faulknerCountyTax = subtotal * (FAULKNER_COUNTY_TAX / 100.0);
 	double conwayMunicipalTax = subtotal * (CONWAY_MUNICIPAL_TAX / 100.0);
+	double afterTax = afterMembership + arkansasStateTax + faulknerCountyTax + conwayMunicipalTax;
 
 	int end_item_width = firstColumnWidth + QUANTITY_WIDTH;
 	cout << left << setw(end_item_width) << "Arkansas State Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << arkansasStateTax << endl;
 	cout << left << setw(end_item_width) << "Faulkner County Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << faulknerCountyTax << endl;
 	cout << left << setw(end_item_width) << "Conway Municipal Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << conwayMunicipalTax << endl;
 
+	cout << "Tip Selection		Amount" << endl;
+	cout << "A. 15%             $"<< fixed << setprecision(2) << afterTax * 0.15 << endl;
+	cout << "B. 20%             $"<< fixed << setprecision(2) << afterTax * 0.20 << endl;
+	cout << "C. 25%             $"<< fixed << setprecision(2) << afterTax * 0.25 << endl;
+	cout << "D. Custom Tip" << endl;
+	char tipChoice; 
+	cin >> tipChoice;
 
-	double totalAmount = subtotal - discount + arkansasStateTax + faulknerCountyTax + conwayMunicipalTax;
+	double tipAmount;
+
+	switch (toupper(tipChoice)) {
+		case 'A':
+			tipAmount = afterTax * 0.15;
+			break;
+		case 'B':
+			tipAmount = afterTax * 0.20;
+			break;
+		case 'C':
+			tipAmount = afterTax * 0.25;
+			break;
+		case 'D': 
+			cout << "Enter custom tip amount: $";
+			cin >> tipAmount;
+			break;
+		
+		default:
+			cout << "Invalid choice. No tip added." << endl;
+			break;
+	}
+
+	double totalAmount = afterTax + tipAmount;
 	
 	
 	cout << left << setw(end_item_width) << "Subtotal" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << subtotal << endl;
 	cout << left << setw(end_item_width) << "Discount" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << discount << endl;
-	cout << left << setw(end_item_width) << "Total" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << total << endl;
+	cout << left << setw(end_item_width) << "Total" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << totalAmount << endl;
 	
 }
