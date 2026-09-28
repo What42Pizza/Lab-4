@@ -3,6 +3,9 @@ const int ITEM_WIDTH = 16;
 const int QUANTITY_WIDTH = 12;
 const int PRICE_WIDTH = 24;
 const int UNIT_PRICE_WIDTH = 12;
+const double ARKANSAS_STATE_TAX = 6.5;
+const double FAULKNER_COUNTY_TAX = 0.5;
+const double CONWAY_MUNICIPAL_TAX = 2.125;
 
 #include <iostream>
 #include <string>
@@ -115,7 +118,7 @@ int main() {
 	cout << setw(QUANTITY_WIDTH) << itemQuantity;
 	cout << right;
 	cout << fixed << setprecision(2) << setw(PRICE_WIDTH) << price;
-	cout << fixed << setprecision(2) << setw(UNIT_PRICE_WIDTH) << price;
+	cout << fixed << setprecision(2) << setw(UNIT_PRICE_WIDTH) << unitPrice;
 	cout << left;
 	cout << endl;
 	
@@ -131,8 +134,20 @@ int main() {
 	double discount = 0.0;
 	if (isMember) discount = subtotal * MEMBER_DISCOUNT;
 	double total = subtotal - discount;
-	
+
+	double arkansasStateTax = subtotal * (ARKANSAS_STATE_TAX / 100.0);
+	double faulknerCountyTax = subtotal * (FAULKNER_COUNTY_TAX / 100.0);
+	double conwayMunicipalTax = subtotal * (CONWAY_MUNICIPAL_TAX / 100.0);
+
 	int end_item_width = firstColumnWidth + QUANTITY_WIDTH;
+	cout << left << setw(end_item_width) << "Arkansas State Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << arkansasStateTax << endl;
+	cout << left << setw(end_item_width) << "Faulkner County Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << faulknerCountyTax << endl;
+	cout << left << setw(end_item_width) << "Conway Municipal Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << conwayMunicipalTax << endl;
+
+
+	double totalAmount = subtotal - discount + arkansasStateTax + faulknerCountyTax + conwayMunicipalTax;
+	
+	
 	cout << left << setw(end_item_width) << "Subtotal" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << subtotal << endl;
 	cout << left << setw(end_item_width) << "Discount" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << discount << endl;
 	cout << left << setw(end_item_width) << "Total" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << total << endl;
