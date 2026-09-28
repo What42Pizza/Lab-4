@@ -1,32 +1,94 @@
 const double MEMBER_DISCOUNT = 0.1;
 const int ITEM_WIDTH = 16;
-const int ITEM_CODE_WDITH = 6;
 const int QUANTITY_WIDTH = 12;
-const int PRICE_WIDTH = 8;
+const int PRICE_WIDTH = 24;
 const int UNIT_PRICE_WIDTH = 12;
+const double ARKANSAS_STATE_TAX = 6.5;
+const double FAULKNER_COUNTY_TAX = 0.5;
+const double CONWAY_MUNICIPAL_TAX = 2.125;
 
 #include <iostream>
 #include <string>
 #include <iomanip>
 using namespace std;
 
+// Mock menu:
+// Code    Product      Small (s)    Medium (m)    Large (l)
+// A       Something    $1.00        $1.00         $1.00
+// B       Something    $1.00        $1.00         $1.00
+// C       Something    $1.00        $1.00         $1.00
+
+struct Product {
+	string name;
+	double smallPrice;
+	double mediumPrice;
+	double largePrice;
+};
+
 int main() {
 	
-	cout << "Food Name: ";
-	string foodName;
-	getline(cin, foodName);
+	Product products[3] = {};
+	products[0] = {"Apple Juice", 2.50, 3.50, 4.50};
+	products[1] = {"Coffee"     , 2.50, 3.50, 4.50};
+	products[2] = {"Green Tea"  , 2.50, 3.50, 4.50};
 	
-	cout << "Item Code: ";
-	char itemCode;
-	cin >> itemCode;
+	cout << "Drink           Small (s)   Medium (m)   Large (l)" << endl;
+	cout << "A Apple Juice   $2.50       $3.50        $4.50" << endl;
+	cout << "B Coffee        $2.50       $3.50        $4.50" << endl;
+	cout << "C Green Tea     $2.50       $3.50        $4.50" << endl;
+	
+	
+	
+	char itemChoice;
+	char sizeChoice;
+	
+	cout << "Select an item: ";
+	cin >> itemChoice;
+	cout << "Select a size: ";
+	cin >> sizeChoice;
+	
+	Product chosenProduct;
+	switch (toupper(itemChoice)) {
+		case 'A':
+			chosenProduct = products[0];
+			break;
+		case 'B':
+			chosenProduct = products[1];
+			break;
+		case 'C':
+			chosenProduct = products[2];
+			break;
+		default:
+			
+			break;
+	}
+	
+	double unitPrice;
+	switch (toupper(sizeChoice)) {
+		case 'S':
+			unitPrice = chosenProduct.smallPrice;
+			break;
+		case 'M':
+			unitPrice = chosenProduct.mediumPrice;
+			break;
+		case 'L':
+			unitPrice = chosenProduct.largePrice;
+			break;
+		default:
+			
+			break;
+	}
+	
+	
+	
+	cout << endl;
+	cout << "Item chosen: " << chosenProduct.name << " (" << ((char) toupper(sizeChoice)) << ") for $" << fixed << setprecision(2) << unitPrice << endl;
+	
+	
 	
 	cout << "Item Quantity: ";
 	int itemQuantity;
 	cin >> itemQuantity;
-	
-	cout << "Unit Price: ";
-	double unitPrice;
-	cin >> unitPrice;
 	
 	cout << "Is Member (enter yes, no, true, or false): ";
 	bool isMember = false;
@@ -37,21 +99,56 @@ int main() {
 	if (isMemberString[0] == 'y') isMember = true;
 	if (isMemberString[0] == 'Y') isMember = true;
 	
-	cout << "Cashier Notes: ";
-	string cashierNotes;
-	cin.ignore();
-	getline(cin, cashierNotes);
 	
-	cout << "'" << cashierNotes << "'" << endl;
+	
+	double price = unitPrice * itemQuantity;
+	double subtotal = price;
+	
+	double discount = 0.0;
+	if (isMember) discount = subtotal * MEMBER_DISCOUNT;
+	double afterMembership = subtotal - discount;
+	
+	double arkansasStateTax = subtotal * (ARKANSAS_STATE_TAX / 100.0);
+	double faulknerCountyTax = subtotal * (FAULKNER_COUNTY_TAX / 100.0);
+	double conwayMunicipalTax = subtotal * (CONWAY_MUNICIPAL_TAX / 100.0);
+	double afterTax = afterMembership + arkansasStateTax + faulknerCountyTax + conwayMunicipalTax;
 	
 	cout << endl;
+	cout << "Tip Selection		Amount" << endl;
+	cout << "A. 15%             $"<< fixed << setprecision(2) << afterTax * 0.15 << endl;
+	cout << "B. 20%             $"<< fixed << setprecision(2) << afterTax * 0.20 << endl;
+	cout << "C. 25%             $"<< fixed << setprecision(2) << afterTax * 0.25 << endl;
+	cout << "D. Custom Tip" << endl;
+	char tipChoice;
+	cin >> tipChoice;
+	double tipAmount;
+	switch (toupper(tipChoice)) {
+		case 'A':
+			tipAmount = afterTax * 0.15;
+			break;
+		case 'B':
+			tipAmount = afterTax * 0.20;
+			break;
+		case 'C':
+			tipAmount = afterTax * 0.25;
+			break;
+		case 'D': 
+			cout << "Enter custom tip amount: $";
+			cin >> tipAmount;
+			break;
+		
+		default:
+			cout << "Invalid choice. No tip added." << endl;
+			break;
+	}
 	
+	
+	
+	cout << endl;
 	cout << left;
-	int firstColumnWidth = max(ITEM_WIDTH, (int) foodName.length());
-	double price = unitPrice * itemQuantity;
+	int firstColumnWidth = max(ITEM_WIDTH, (int) chosenProduct.name.length());
 	
 	cout << setw(firstColumnWidth) << "Item";
-	cout << setw(ITEM_CODE_WDITH) << "Code";
 	cout << setw(QUANTITY_WIDTH) << "Quantity";
 	cout << right;
 	cout << setw(PRICE_WIDTH) << "Price";
@@ -59,8 +156,7 @@ int main() {
 	cout << left;
 	cout << endl;
 	
-	cout << setw(firstColumnWidth) << foodName;
-	cout << setw(ITEM_CODE_WDITH) << itemCode;
+	cout << setw(firstColumnWidth) << chosenProduct.name;
 	cout << setw(QUANTITY_WIDTH) << itemQuantity;
 	cout << right;
 	cout << fixed << setprecision(2) << setw(PRICE_WIDTH) << price;
@@ -69,25 +165,31 @@ int main() {
 	cout << endl;
 	
 	cout << endl;
-	int total_width = firstColumnWidth + ITEM_CODE_WDITH + QUANTITY_WIDTH + PRICE_WIDTH + UNIT_PRICE_WIDTH;
+	int total_width = firstColumnWidth + QUANTITY_WIDTH + PRICE_WIDTH + UNIT_PRICE_WIDTH;
 	for (int i = 0; i < total_width; i++) {
 		cout << '-';
 	}
 	cout << endl;
-	
-	double subtotal = price;
-	
-	double discount = 0.0;
-	if (isMember) discount = subtotal * MEMBER_DISCOUNT;
-	double total = subtotal - discount;
-	
-	int end_item_width = firstColumnWidth + ITEM_CODE_WDITH + QUANTITY_WIDTH;
+
+	int end_item_width = firstColumnWidth + QUANTITY_WIDTH;
+	cout << left << setw(end_item_width) << "Arkansas State Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << arkansasStateTax << endl;
+	cout << left << setw(end_item_width) << "Faulkner County Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << faulknerCountyTax << endl;
+	cout << left << setw(end_item_width) << "Conway Municipal Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << conwayMunicipalTax << endl;
+
+	double totalAmount = afterTax + tipAmount;
+		
 	cout << left << setw(end_item_width) << "Subtotal" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << subtotal << endl;
-	cout << left << setw(end_item_width) << "Discount" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << discount << endl;
-	cout << left << setw(end_item_width) << "Total" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << total << endl;
-	
-	cout << endl;
-	cout << "Cashier Notes:" << endl;
-	cout << cashierNotes;
+	cout << left << setw(end_item_width) << "After Membership" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << afterMembership << endl;
+	cout << left << setw(end_item_width) << "After Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << afterTax << endl;
+	cout << left << setw(end_item_width) << "Total" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << totalAmount << endl;
 	
 }
+
+/*
+
+subtotal = all items to pay for
+after_membership = subtotal * (1.0 - discount)
+after_tax = after_membership * (1.0 + tax)
+total = after_tax + tip
+
+*/
