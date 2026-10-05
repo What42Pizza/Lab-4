@@ -1,1 +1,1 @@
-g++ -Wall -Wextra -std=c++14 main.cpp -o "build/lab 5.exe"; ./build/"Lab 5.exe"
+g++ -Wall -Wextra -std=c++14 main.cpp -o "build/lab 6.exe"; ./build/"Lab 6.exe"

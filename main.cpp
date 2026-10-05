@@ -8,9 +8,17 @@ const double FAULKNER_COUNTY_TAX = 0.5;
 const double CONWAY_MUNICIPAL_TAX = 2.125;
 
 #include <iostream>
-#include <string>
 #include <iomanip>
+#include <string>
+#include <algorithm>
+#include <cctype>
 using namespace std;
+
+void toLower(string &str) {
+	transform(str.begin(), str.end(), str.begin(), [](unsigned char c) {
+        return std::tolower(c);
+    });
+}
 
 // Mock menu:
 // Code    Product      Small (s)    Medium (m)    Large (l)
@@ -39,44 +47,57 @@ int main() {
 	
 	
 	
-	char itemChoice;
-	char sizeChoice;
-	
-	cout << "Select an item: ";
-	cin >> itemChoice;
-	cout << "Select a size: ";
-	cin >> sizeChoice;
-	
 	Product chosenProduct;
-	switch (toupper(itemChoice)) {
-		case 'A':
-			chosenProduct = products[0];
-			break;
-		case 'B':
-			chosenProduct = products[1];
-			break;
-		case 'C':
-			chosenProduct = products[2];
-			break;
-		default:
-			
-			break;
+	
+	bool inputIsValid = false;
+	while (!inputIsValid) {
+		char itemChoice;
+		cout << "Select an item: ";
+		cin >> itemChoice;
+		switch (toupper(itemChoice)) {
+			case 'A':
+				chosenProduct = products[0];
+				inputIsValid = true;
+				break;
+			case 'B':
+				chosenProduct = products[1];
+				inputIsValid = true;
+				break;
+			case 'C':
+				chosenProduct = products[2];
+				inputIsValid = true;
+				break;
+			default:
+				inputIsValid = false;
+				cout << "Input is not valid" << endl;
+				break;
+		}
 	}
 	
+	inputIsValid = false;
+	char sizeChoice;
 	double unitPrice;
-	switch (toupper(sizeChoice)) {
-		case 'S':
-			unitPrice = chosenProduct.smallPrice;
-			break;
-		case 'M':
-			unitPrice = chosenProduct.mediumPrice;
-			break;
-		case 'L':
-			unitPrice = chosenProduct.largePrice;
-			break;
-		default:
-			
-			break;
+	while (!inputIsValid) {
+		cout << "Select a size: ";
+		cin >> sizeChoice;
+		switch (toupper(sizeChoice)) {
+			case 'S':
+				unitPrice = chosenProduct.smallPrice;
+				inputIsValid = true;
+				break;
+			case 'M':
+				unitPrice = chosenProduct.mediumPrice;
+				inputIsValid = true;
+				break;
+			case 'L':
+				unitPrice = chosenProduct.largePrice;
+				inputIsValid = true;
+				break;
+			default:
+				inputIsValid = false;
+				cout << "Input is not valid" << endl;
+				break;
+		}
 	}
 	
 	
@@ -90,14 +111,29 @@ int main() {
 	int itemQuantity;
 	cin >> itemQuantity;
 	
-	cout << "Is Member (enter yes, no, true, or false): ";
+	
+	inputIsValid = false;
 	bool isMember = false;
-	string isMemberString;
-	cin >> isMemberString;
-	if (isMemberString[0] == 't') isMember = true;
-	if (isMemberString[0] == 'T') isMember = true;
-	if (isMemberString[0] == 'y') isMember = true;
-	if (isMemberString[0] == 'Y') isMember = true;
+	cin.ignore();
+	while (!inputIsValid) {
+		
+		cout << "Is Member (enter Yes or No): ";
+		string isMemberString;
+		getline(cin, isMemberString);
+		toLower(isMemberString);
+		
+		if (isMemberString == "yes") {
+			isMember = true;
+			inputIsValid = true;
+		} else if (isMemberString == "no") {
+			isMember = false;
+			inputIsValid = true;
+		} else {
+			cout << "Input is not valid" << endl;
+			inputIsValid = false;
+		}
+		
+	}
 	
 	
 	
@@ -119,27 +155,35 @@ int main() {
 	cout << "B. 20%             $"<< fixed << setprecision(2) << afterTax * 0.20 << endl;
 	cout << "C. 25%             $"<< fixed << setprecision(2) << afterTax * 0.25 << endl;
 	cout << "D. Custom Tip" << endl;
-	char tipChoice;
-	cin >> tipChoice;
 	double tipAmount;
-	switch (toupper(tipChoice)) {
-		case 'A':
-			tipAmount = afterTax * 0.15;
-			break;
-		case 'B':
-			tipAmount = afterTax * 0.20;
-			break;
-		case 'C':
-			tipAmount = afterTax * 0.25;
-			break;
-		case 'D': 
-			cout << "Enter custom tip amount: $";
-			cin >> tipAmount;
-			break;
-		
-		default:
-			cout << "Invalid choice. No tip added." << endl;
-			break;
+	
+	inputIsValid = false;
+	while (!inputIsValid) {
+		char tipChoice;
+		cin >> tipChoice;
+		switch (toupper(tipChoice)) {
+			case 'A':
+				tipAmount = afterTax * 0.15;
+				inputIsValid = true;
+				break;
+			case 'B':
+				tipAmount = afterTax * 0.20;
+				inputIsValid = true;
+				break;
+			case 'C':
+				tipAmount = afterTax * 0.25;
+				inputIsValid = true;
+				break;
+			case 'D': 
+				cout << "Enter custom tip amount: $";
+				inputIsValid = true;
+				cin >> tipAmount;
+				break;
+			default:
+				cout << "Input is not valid" << endl;
+				inputIsValid = false;
+				break;
+		}
 	}
 	
 	
