@@ -1,4 +1,5 @@
 # Students:
 
 - Jonathan Burg
-- Jordan Johnson
+- Jordan Johnson (lab 5)
+- Hunter Johnson (lab 6)
