@@ -34,13 +34,14 @@ struct Product {
 	double smallPrice;
 	double mediumPrice;
 	double largePrice;
+	int inventoryCount;
 };
 
 int main() {
 	ofstream receiptFile;
 	receiptFile.open("Receipt.txt");
 		if (!receiptFile.is_open()) {
-		cout << "Error: could not open file \"receipt.txt\"";
+		cout << "Error: could not open file \"Receipt.txt\"";
 		return 1;
 	}
 
@@ -69,15 +70,37 @@ int main() {
 		}
 		i ++;
 	}
-
 	itemDatas.close();
+	
+	ifstream inventory;
+	inventory.open("Inventory.txt");
+	if (!inventory.is_open()) {
+		cout << "Error: could not open file \"Inventory.txt\"";
+		return 1;
+	}
+	
+	i = 0;
+	while (true) {
+		string productName;
+		if (getline(inventory, productName)) {
+			if (productName != products[i].name) {
+				cout << "Warning: item " << (i + 1) << " of Item Datas.txt does not match item " << (i + 1) << " of Inventory.txt" << endl;
+			}
+			inventory >> products[i].inventoryCount;
+			inventory.ignore();
+		} else {
+			break;
+		}
+		i ++;
+	}
+	inventory.close();
 
 	bool moreCustomers = true;
 	while (moreCustomers) {
 		
 		cout << "Customer name: ";
 		string customerName;
-		cin >> customerName;
+		getline(cin, customerName);
 		
 		ostringstream itemsOutput;
 		bool addMoreItems = true;
@@ -97,7 +120,7 @@ int main() {
 			
 			
 			
-			Product chosenProduct;
+			Product& chosenProduct = products[0];
 			
 			bool inputIsValid = false;
 			while (!inputIsValid) {
@@ -158,6 +181,7 @@ int main() {
 			cout << "Item Quantity: ";
 			int itemQuantity;
 			cin >> itemQuantity;
+			chosenProduct.inventoryCount -= itemQuantity;
 		
 			itemsOutput << left;
 			itemsOutput << setw(ITEM_WIDTH) << chosenProduct.name;
@@ -381,7 +405,16 @@ int main() {
 		}
 
 	}
+	
 	receiptFile.close();
+	
+	ofstream inventoryOut;
+	inventoryOut.open("Inventory.txt");
+	for (int i = 0; i < (int) products.size(); i++) {
+		inventoryOut << products[i].name << endl;
+		inventoryOut << products[i].inventoryCount << endl;
+	}
+	inventoryOut.close();
 }
 
 /*
