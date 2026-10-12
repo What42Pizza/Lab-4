@@ -37,7 +37,14 @@ struct Product {
 };
 
 int main() {
-	
+	ofstream receiptFile;
+	receiptFile.open("Receipt.txt");
+		if (!receiptFile.is_open()) {
+		cout << "Error: could not open file \"receipt.txt\"";
+		return 1;
+	}
+
+
 	vector<Product> products;
 	
 	ifstream itemDatas;
@@ -62,6 +69,8 @@ int main() {
 		}
 		i ++;
 	}
+
+	itemDatas.close();
 
 	bool moreCustomers = true;
 	while (moreCustomers) {
@@ -310,6 +319,45 @@ int main() {
 		cout << left << setw(end_item_width) << "Total" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << totalAmount << endl;
 		cout << left << setw(end_item_width) << "Loyalty Points" << right << setw(PRICE_WIDTH) << loyaltyPointsString << endl;
 		
+
+		receiptFile << "Receipt:" << endl;
+			for (int i = 0; i < total_width; i++) {
+			receiptFile << '-';
+		}
+
+		receiptFile << endl;
+		receiptFile << "Customer: " << customerName << endl;
+		receiptFile << endl;
+		
+		receiptFile << setw(ITEM_WIDTH) << "Item";
+		receiptFile << setw(QUANTITY_WIDTH) << "Quantity";
+		receiptFile << right;
+		receiptFile << setw(PRICE_WIDTH) << "Price";
+		receiptFile << setw(UNIT_PRICE_WIDTH) << "Unit Price";
+		receiptFile << left;
+		receiptFile << endl;
+		
+		receiptFile << itemsOutput.str();
+		
+		receiptFile << endl;
+		for (int i = 0; i < total_width; i++) {
+			receiptFile << '-';
+		}
+		receiptFile << endl;
+
+		receiptFile << left << setw(end_item_width) << "Arkansas State Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << arkansasStateTax << endl;
+		receiptFile << left << setw(end_item_width) << "Faulkner County Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << faulknerCountyTax << endl;
+		receiptFile << left << setw(end_item_width) << "Conway Municipal Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << conwayMunicipalTax << endl;
+
+		
+		
+		receiptFile << left << setw(end_item_width) << "Subtotal" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << subtotal << endl;
+		receiptFile << left << setw(end_item_width) << "After Membership" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << afterMembership << endl;
+		receiptFile << left << setw(end_item_width) << "After Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << afterTax << endl;
+		receiptFile << left << setw(end_item_width) << "Tip" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << tipAmount << endl;
+		receiptFile << left << setw(end_item_width) << "Total" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << totalAmount << endl;
+		receiptFile << left << setw(end_item_width) << "Loyalty Points" << right << setw(PRICE_WIDTH) << loyaltyPointsString << endl;
+		
 		inputIsValid = false;
 		cin.ignore();
 		while (!inputIsValid) {
@@ -333,6 +381,7 @@ int main() {
 		}
 
 	}
+	receiptFile.close();
 }
 
 /*
