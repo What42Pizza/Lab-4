@@ -37,34 +37,34 @@ struct Product {
 };
 
 int main() {
+	
+	vector<Product> products;
+	
+	ifstream itemDatas;
+	itemDatas.open("Item Datas.txt");
+	if (!itemDatas.is_open()) {
+		cout << "Error: could not open file \"Item Datas.txt\"";
+		return 1;
+	}
+	
+	int i = 0;
+	while (true) {
+		string productName;
+		if (getline(itemDatas, productName)) {
+			products.push_back({});
+			products[i].name = productName;
+			itemDatas >> products[i].smallPrice;
+			itemDatas >> products[i].mediumPrice;
+			itemDatas >> products[i].largePrice;
+			itemDatas.ignore();
+		} else {
+			break;
+		}
+		i ++;
+	}
 
 	bool moreCustomers = true;
-	while( moreCustomers){
-		
-		vector<Product> products;
-		
-		ifstream itemDatas;
-		itemDatas.open("Item Datas.txt");
-		if (!itemDatas.is_open()) {
-			cout << "Error: could not open file \"Item Datas.txt\"";
-			return 1;
-		}
-		
-		int i = 0;
-		while (true) {
-			string productName;
-			if (getline(itemDatas, productName)) {
-				products.push_back({});
-				products[i].name = productName;
-				itemDatas >> products[i].smallPrice;
-				itemDatas >> products[i].mediumPrice;
-				itemDatas >> products[i].largePrice;
-				itemDatas.ignore();
-			} else {
-				break;
-			}
-			i ++;
-		}
+	while (moreCustomers) {
 		
 		cout << "Customer name: ";
 		string customerName;
