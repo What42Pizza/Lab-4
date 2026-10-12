@@ -9,10 +9,12 @@ const double CONWAY_MUNICIPAL_TAX = 2.125;
 
 #include <iostream>
 #include <sstream>
+#include <fstream>
 #include <iomanip>
 #include <string>
 #include <algorithm>
 #include <cctype>
+#include <vector>
 using namespace std;
 
 void toLower(string &str) {
@@ -39,10 +41,30 @@ int main() {
 	bool moreCustomers = true;
 	while( moreCustomers){
 		
-		Product products[3] = {};
-		products[0] = {"Apple Juice", 2.50, 3.50, 4.50};
-		products[1] = {"Coffee"     , 2.50, 3.50, 4.50};
-		products[2] = {"Green Tea"  , 2.50, 3.50, 4.50};
+		vector<Product> products;
+		
+		ifstream itemDatas;
+		itemDatas.open("Item Datas.txt");
+		if (!itemDatas.is_open()) {
+			cout << "Error: could not open file \"Item Datas.txt\"";
+			return 1;
+		}
+		
+		int i = 0;
+		while (true) {
+			string productName;
+			if (getline(itemDatas, productName)) {
+				products.push_back({});
+				products[i].name = productName;
+				itemDatas >> products[i].smallPrice;
+				itemDatas >> products[i].mediumPrice;
+				itemDatas >> products[i].largePrice;
+				itemDatas.ignore();
+			} else {
+				break;
+			}
+			i ++;
+		}
 		
 		cout << "Customer name: ";
 		string customerName;
@@ -53,10 +75,16 @@ int main() {
 		double itemsTotal = 0.0;
 		while (addMoreItems) {
 			
-			cout << "Drink           Small (s)   Medium (m)   Large (l)" << endl;
-			cout << "A Apple Juice   $2.50       $3.50        $4.50" << endl;
-			cout << "B Coffee        $2.50       $3.50        $4.50" << endl;
-			cout << "C Green Tea     $2.50       $3.50        $4.50" << endl;
+			int max_width = 5;
+			for (int i = 0; i < (int) products.size(); i ++) {
+				max_width = max(max_width, (int) products[i].name.length());
+			}
+			max_width += 3;
+			
+			cout << left << setw(max_width + 2) << "Drink" << "Small (s)   Medium (m)   Large (l)" << endl << setprecision(2) << fixed;
+			for (int i = 0; i < (int) products.size(); i ++) {
+				cout << (char) ('A' + i) << " " << left << setw(max_width) << products[i].name << "$" << products[i].smallPrice << "       " << "$" << products[i].mediumPrice << "        " << "$" << products[i].largePrice << endl;
+			}
 			
 			
 			
