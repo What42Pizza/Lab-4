@@ -35,6 +35,7 @@ struct Product {
 	double mediumPrice;
 	double largePrice;
 	int inventoryCount;
+	int amountTaken;
 };
 
 int main() {
@@ -182,6 +183,7 @@ int main() {
 			int itemQuantity;
 			cin >> itemQuantity;
 			chosenProduct.inventoryCount -= itemQuantity;
+			chosenProduct.amountTaken += itemQuantity;
 		
 			itemsOutput << left;
 			itemsOutput << setw(ITEM_WIDTH) << chosenProduct.name;
@@ -415,6 +417,25 @@ int main() {
 		inventoryOut << products[i].inventoryCount << endl;
 	}
 	inventoryOut.close();
+	
+	
+	cout << endl;
+	cout << "Daily Inventory:" << endl;		
+	
+	int max_width = 5;
+	for (int i = 0; i < (int) products.size(); i ++) {
+		max_width = max(max_width, (int) products[i].name.length());
+	}
+	max_width += 3;
+	
+	cout << left << setw(max_width + 2) << "Drink" << "Start    Change    End" << endl << setprecision(2) << fixed;
+	for (int i = 0; i < (int) products.size(); i ++) {
+		int change = -products[i].amountTaken;
+		int end = products[i].inventoryCount;
+		int start = end - change;
+		cout << left << setw(max_width) << products[i].name << setw(9) << start << setw(9) << change << end << endl;
+	}
+	
 }
 
 /*
