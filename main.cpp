@@ -39,10 +39,13 @@ struct Product {
 
 
 // processes a customer, asks for customer items, prints and writes receipt, etc
-void serveCustomer(bool &moreCustomers, vector<Product> &products, ofstream &receiptFile);
+void serveCustomer(vector<Product> &products, ofstream &receiptFile);
 
 // generates and outputs the receipt to the given output stream
 void printReceipt(ostream &output, string customerName, string itemsOutput, double afterTax, double tipAmount, double subtotal, double afterMembership, double arkansasStateTax, double faulknerCountyTax, double conwayMunicipalTax);
+
+// Gets the character width needed to print a column of product names 
+int getProductNamesWidth(vector<Product> &products);
 
 // prompts the user for a yes/no input with the given prompt
 bool getYesNoInput(string prompt);
@@ -50,14 +53,6 @@ bool getYesNoInput(string prompt);
 // converts a string to lowercase
 // note: this edits the input string instead of returning a new string
 void toLower(string &str);
-
-
-
-void toLower(string &str) {
-	transform(str.begin(), str.end(), str.begin(), [](unsigned char c) {
-        return std::tolower(c);
-    });
-}
 
 
 
@@ -137,10 +132,22 @@ int main() {
 	
 	bool moreCustomers = true;
 	while (moreCustomers) {
-		serveCustomer(moreCustomers, products, receiptFile);
+		
+		serveCustomer(products, receiptFile);
+		
+		cin.ignore();
+		cout << endl;
+		cout << endl;
+		moreCustomers = getYesNoInput("Do another customer? (enter Yes or No:) ");
+		
 	}
 	
+	// close receipt file, not needed after main loop
 	receiptFile.close();
+	
+	
+	
+	// save inventory
 	
 	ofstream inventoryOut;
 	inventoryOut.open("Inventory.txt");
@@ -151,32 +158,26 @@ int main() {
 	inventoryOut.close();
 	
 	
+	
+	// print daily inventory and what has changed
+	
 	cout << endl;
-	cout << "Daily Inventory:" << endl;		
+	cout << "Daily Inventory:" << endl;
 	
-	int max_width = 5;
-	for (int i = 0; i < (int) products.size(); i ++) {
-		max_width = max(max_width, (int) products[i].name.length());
-	}
-	max_width += 3;
-	
-	cout << left << setw(max_width + 2) << "Drink" << "Start    Change    End" << endl << setprecision(2) << fixed;
+	int producNamesWidth = getProductNamesWidth(products);
+	cout << left << setw(producNamesWidth + 2) << "Drink" << "Start    Change    End" << endl << setprecision(2) << fixed;
 	for (int i = 0; i < (int) products.size(); i ++) {
 		int change = -products[i].amountTaken;
 		int end = products[i].inventoryCount;
 		int start = end - change;
-		cout << left << setw(max_width) << products[i].name << setw(9) << start << setw(9) << change << end << endl;
-	}
-	
-	for (int i = 0; i < 3; i ++) {
-		cout << products[i].name << endl;
+		cout << left << setw(producNamesWidth) << products[i].name << setw(9) << start << setw(9) << change << end << endl;
 	}
 	
 }
 
 
 
-void serveCustomer(bool &moreCustomers, vector<Product> &products, ofstream &receiptFile) {
+void serveCustomer(vector<Product> &products, ofstream &receiptFile) {
 	
 	cout << "Customer name: ";
 	string customerName;
@@ -187,21 +188,22 @@ void serveCustomer(bool &moreCustomers, vector<Product> &products, ofstream &rec
 	double itemsTotal = 0.0;
 	while (addMoreItems) {
 		
-		int max_width = 5;
+		
+		
+		// print available products
+		
+		int producNamesWidth = getProductNamesWidth(products);
+		cout << endl;
+		cout << left << setw(producNamesWidth + 2) << "Drink" << "Small (s)   Medium (m)   Large (l)" << endl << setprecision(2) << fixed;
 		for (int i = 0; i < (int) products.size(); i ++) {
-			max_width = max(max_width, (int) products[i].name.length());
-		}
-		max_width += 3;
-		
-		cout << left << setw(max_width + 2) << "Drink" << "Small (s)   Medium (m)   Large (l)" << endl << setprecision(2) << fixed;
-		for (int i = 0; i < (int) products.size(); i ++) {
-			cout << (char) ('A' + i) << " " << left << setw(max_width) << products[i].name << "$" << products[i].smallPrice << "       " << "$" << products[i].mediumPrice << "        " << "$" << products[i].largePrice << endl;
+			cout << (char) ('A' + i) << " " << left << setw(producNamesWidth) << products[i].name << "$" << products[i].smallPrice << "       " << "$" << products[i].mediumPrice << "        " << "$" << products[i].largePrice << endl;
 		}
 		
 		
+		
+		// choose a product
 		
 		Product* chosenProduct = &products[0];
-		
 		bool inputIsValid = false;
 		while (!inputIsValid) {
 			char itemChoice;
@@ -226,6 +228,8 @@ void serveCustomer(bool &moreCustomers, vector<Product> &products, ofstream &rec
 					break;
 			}
 		}
+		
+		// choose a size
 		
 		inputIsValid = false;
 		char sizeChoice;
@@ -253,11 +257,12 @@ void serveCustomer(bool &moreCustomers, vector<Product> &products, ofstream &rec
 			}
 		}
 		
-		
-		
 		cout << endl;
 		cout << "Item chosen: " << chosenProduct->name << " (" << ((char) toupper(sizeChoice)) << ") for $" << fixed << setprecision(2) << unitPrice << endl;
 		
+		// choose an amount
+		
+		cout << endl;
 		cout << "Item Quantity: ";
 		int itemQuantity;
 		cin >> itemQuantity;
@@ -277,14 +282,21 @@ void serveCustomer(bool &moreCustomers, vector<Product> &products, ofstream &rec
 		
 		
 		
+		// ask if more items should be added
+		
 		cin.ignore();
+		cout << endl;
 		addMoreItems = getYesNoInput("Add another item? (enter Yes or No:) ");
 		
 	}
 	
 	
 	
+	// ask final questions
+	cout << endl;
 	bool isMember = getYesNoInput("Is Member? (enter Yes or No:) ");
+	
+	// calculate maount owed
 	
 	double subtotal = itemsTotal;
 	
@@ -296,6 +308,10 @@ void serveCustomer(bool &moreCustomers, vector<Product> &products, ofstream &rec
 	double faulknerCountyTax = subtotal * (FAULKNER_COUNTY_TAX / 100.0);
 	double conwayMunicipalTax = subtotal * (CONWAY_MUNICIPAL_TAX / 100.0);
 	double afterTax = afterMembership + arkansasStateTax + faulknerCountyTax + conwayMunicipalTax;
+	
+	
+	
+	// ask for tip
 	
 	cout << endl;
 	cout << "Tip Selection		Amount" << endl;
@@ -336,17 +352,14 @@ void serveCustomer(bool &moreCustomers, vector<Product> &products, ofstream &rec
 	
 	
 	
+	// create receipt
+	
 	cout << endl;
 	cout << left;
 	
 	cout << "Receipt:" << endl;
 	printReceipt(cout, customerName, itemsOutput.str(), afterTax, tipAmount, subtotal, afterMembership, arkansasStateTax, faulknerCountyTax, conwayMunicipalTax);
 	printReceipt(receiptFile, customerName, itemsOutput.str(), afterTax, tipAmount, subtotal, afterMembership, arkansasStateTax, faulknerCountyTax, conwayMunicipalTax);
-	
-	
-	cin.ignore();
-	cout << endl;
-	moreCustomers = getYesNoInput("Do another customer? (enter Yes or No:) ");
 	
 }
 
@@ -402,6 +415,16 @@ void printReceipt(ostream &output, string customerName, string itemsOutput, doub
 
 
 
+int getProductNamesWidth(vector<Product> &products) {
+	int max_width = 5;
+	for (int i = 0; i < (int) products.size(); i ++) {
+		max_width = max(max_width, (int) products[i].name.length());
+	}
+	return max_width + 3;
+}
+
+
+
 bool getYesNoInput(string prompt) {
 	while (true) {
 		
@@ -419,4 +442,12 @@ bool getYesNoInput(string prompt) {
 		}
 		
 	}
+}
+
+
+
+void toLower(string &str) {
+	transform(str.begin(), str.end(), str.begin(), [](unsigned char c) {
+        return std::tolower(c);
+    });
 }

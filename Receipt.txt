@@ -1,16 +1,18 @@
 
-Customer: jon
+Customer: Jon
 
                     Item    Quantity                   Price  Unit Price
-Apple Juice             5                              12.50        2.50
+Apple Juice             1                               2.50        2.50
+Coffee                  2                               5.00        2.50
+Green Tea               3                               7.50        2.50
 
 ------------------------------------------------------------------------
-Arkansas State Tax                                      0.81
-Faulkner County Tax                                     0.06
-Conway Municipal Tax                                    0.27
-Subtotal                                               12.50
-After Membership                                       11.25
-After Tax                                              12.39
-Tip                                                    15.00
-Total                                                  27.39
-Loyalty Points                                     *********
+Arkansas State Tax                                      0.98
+Faulkner County Tax                                     0.07
+Conway Municipal Tax                                    0.32
+Subtotal                                               15.00
+After Membership                                       13.50
+After Tax                                              14.87
+Tip                                                     2.23
+Total                                                  17.10
+Loyalty Points                                         *****

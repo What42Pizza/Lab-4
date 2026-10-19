@@ -1,6 +1,6 @@
 Apple Juice
-44
+43
 Coffee
-40
+38
 Green Tea
-50
+47
