@@ -41,6 +41,9 @@ struct Product {
 // processes a customer, asks for customer items, prints and writes receipt, etc
 void serveCustomer(bool &moreCustomers, vector<Product> &products, ofstream &receiptFile);
 
+// generates and outputs the receipt to the given output stream
+void printReceipt(ostream &output, string customerName, string itemsOutput, double afterTax, double tipAmount, double subtotal, double afterMembership, double arkansasStateTax, double faulknerCountyTax, double conwayMunicipalTax);
+
 // prompts the user for a yes/no input with the given prompt
 bool getYesNoInput(string prompt);
 
@@ -256,7 +259,7 @@ void serveCustomer(bool &moreCustomers, vector<Product> &products, ofstream &rec
 		cin >> itemQuantity;
 		chosenProduct.inventoryCount -= itemQuantity;
 		chosenProduct.amountTaken += itemQuantity;
-	
+		
 		itemsOutput << left;
 		itemsOutput << setw(ITEM_WIDTH) << chosenProduct.name;
 		itemsOutput << setw(QUANTITY_WIDTH) << itemQuantity;
@@ -326,42 +329,55 @@ void serveCustomer(bool &moreCustomers, vector<Product> &products, ofstream &rec
 				break;
 		}
 	}
-
+	
 	
 	
 	cout << endl;
 	cout << left;
 	
 	cout << "Receipt:" << endl;
+	printReceipt(cout, customerName, itemsOutput.str(), afterTax, tipAmount, subtotal, afterMembership, arkansasStateTax, faulknerCountyTax, conwayMunicipalTax);
+	printReceipt(receiptFile, customerName, itemsOutput.str(), afterTax, tipAmount, subtotal, afterMembership, arkansasStateTax, faulknerCountyTax, conwayMunicipalTax);
+	
+	
+	cin.ignore();
+	moreCustomers = getYesNoInput("Do another customer? (enter Yes or No:) ");
+	
+}
+
+
+
+void printReceipt(ostream &output, string customerName, string itemsOutput, double afterTax, double tipAmount, double subtotal, double afterMembership, double arkansasStateTax, double faulknerCountyTax, double conwayMunicipalTax) {
+	
 	int total_width = ITEM_WIDTH + QUANTITY_WIDTH + PRICE_WIDTH + UNIT_PRICE_WIDTH;
-		for (int i = 0; i < total_width; i++) {
-		cout << '-';
-	}
-	cout << endl;
-	cout << "Customer: " << customerName << endl;
-	cout << endl;
-	
-	cout << setw(ITEM_WIDTH) << "Item";
-	cout << setw(QUANTITY_WIDTH) << "Quantity";
-	cout << right;
-	cout << setw(PRICE_WIDTH) << "Price";
-	cout << setw(UNIT_PRICE_WIDTH) << "Unit Price";
-	cout << left;
-	cout << endl;
-	
-	cout << itemsOutput.str();
-	
-	cout << endl;
 	for (int i = 0; i < total_width; i++) {
 		cout << '-';
 	}
-	cout << endl;
-
+	output << endl;
+	output << "Customer: " << customerName << endl;
+	output << endl;
+	
+	output << setw(ITEM_WIDTH) << "Item";
+	output << setw(QUANTITY_WIDTH) << "Quantity";
+	output << right;
+	output << setw(PRICE_WIDTH) << "Price";
+	output << setw(UNIT_PRICE_WIDTH) << "Unit Price";
+	output << left;
+	output << endl;
+	
+	output << itemsOutput;
+	
+	output << endl;
+	for (int i = 0; i < total_width; i++) {
+		output << '-';
+	}
+	output << endl;
+	
 	int end_item_width = ITEM_WIDTH + QUANTITY_WIDTH;
-	cout << left << setw(end_item_width) << "Arkansas State Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << arkansasStateTax << endl;
-	cout << left << setw(end_item_width) << "Faulkner County Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << faulknerCountyTax << endl;
-	cout << left << setw(end_item_width) << "Conway Municipal Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << conwayMunicipalTax << endl;
-
+	output << left << setw(end_item_width) << "Arkansas State Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << arkansasStateTax << endl;
+	output << left << setw(end_item_width) << "Faulkner County Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << faulknerCountyTax << endl;
+	output << left << setw(end_item_width) << "Conway Municipal Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << conwayMunicipalTax << endl;
+	
 	double totalAmount = afterTax + tipAmount;
 	
 	int loyaltyPoints = totalAmount / 3; 
@@ -370,16 +386,12 @@ void serveCustomer(bool &moreCustomers, vector<Product> &products, ofstream &rec
 		loyaltyPointsString += "*";
 	} 
 	
-	cout << left << setw(end_item_width) << "Subtotal" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << subtotal << endl;
-	cout << left << setw(end_item_width) << "After Membership" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << afterMembership << endl;
-	cout << left << setw(end_item_width) << "After Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << afterTax << endl;
-	cout << left << setw(end_item_width) << "Tip" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << tipAmount << endl;
-	cout << left << setw(end_item_width) << "Total" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << totalAmount << endl;
-	cout << left << setw(end_item_width) << "Loyalty Points" << right << setw(PRICE_WIDTH) << loyaltyPointsString << endl;
-	
-	
-	cin.ignore();
-	moreCustomers = getYesNoInput("Do another customer? (enter Yes or No:) ");
+	output << left << setw(end_item_width) << "Subtotal" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << subtotal << endl;
+	output << left << setw(end_item_width) << "After Membership" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << afterMembership << endl;
+	output << left << setw(end_item_width) << "After Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << afterTax << endl;
+	output << left << setw(end_item_width) << "Tip" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << tipAmount << endl;
+	output << left << setw(end_item_width) << "Total" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << totalAmount << endl;
+	output << left << setw(end_item_width) << "Loyalty Points" << right << setw(PRICE_WIDTH) << loyaltyPointsString << endl;
 	
 }
 
