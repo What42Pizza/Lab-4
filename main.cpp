@@ -168,6 +168,10 @@ int main() {
 		cout << left << setw(max_width) << products[i].name << setw(9) << start << setw(9) << change << end << endl;
 	}
 	
+	for (int i = 0; i < 3; i ++) {
+		cout << products[i].name << endl;
+	}
+	
 }
 
 
@@ -196,7 +200,7 @@ void serveCustomer(bool &moreCustomers, vector<Product> &products, ofstream &rec
 		
 		
 		
-		Product& chosenProduct = products[0];
+		Product* chosenProduct = &products[0];
 		
 		bool inputIsValid = false;
 		while (!inputIsValid) {
@@ -205,15 +209,15 @@ void serveCustomer(bool &moreCustomers, vector<Product> &products, ofstream &rec
 			cin >> itemChoice;
 			switch (toupper(itemChoice)) {
 				case 'A':
-					chosenProduct = products[0];
+					chosenProduct = &products[0];
 					inputIsValid = true;
 					break;
 				case 'B':
-					chosenProduct = products[1];
+					chosenProduct = &products[1];
 					inputIsValid = true;
 					break;
 				case 'C':
-					chosenProduct = products[2];
+					chosenProduct = &products[2];
 					inputIsValid = true;
 					break;
 				default:
@@ -231,15 +235,15 @@ void serveCustomer(bool &moreCustomers, vector<Product> &products, ofstream &rec
 			cin >> sizeChoice;
 			switch (toupper(sizeChoice)) {
 				case 'S':
-					unitPrice = chosenProduct.smallPrice;
+					unitPrice = chosenProduct->smallPrice;
 					inputIsValid = true;
 					break;
 				case 'M':
-					unitPrice = chosenProduct.mediumPrice;
+					unitPrice = chosenProduct->mediumPrice;
 					inputIsValid = true;
 					break;
 				case 'L':
-					unitPrice = chosenProduct.largePrice;
+					unitPrice = chosenProduct->largePrice;
 					inputIsValid = true;
 					break;
 				default:
@@ -252,16 +256,16 @@ void serveCustomer(bool &moreCustomers, vector<Product> &products, ofstream &rec
 		
 		
 		cout << endl;
-		cout << "Item chosen: " << chosenProduct.name << " (" << ((char) toupper(sizeChoice)) << ") for $" << fixed << setprecision(2) << unitPrice << endl;
+		cout << "Item chosen: " << chosenProduct->name << " (" << ((char) toupper(sizeChoice)) << ") for $" << fixed << setprecision(2) << unitPrice << endl;
 		
 		cout << "Item Quantity: ";
 		int itemQuantity;
 		cin >> itemQuantity;
-		chosenProduct.inventoryCount -= itemQuantity;
-		chosenProduct.amountTaken += itemQuantity;
+		chosenProduct->inventoryCount -= itemQuantity;
+		chosenProduct->amountTaken += itemQuantity;
 		
 		itemsOutput << left;
-		itemsOutput << setw(ITEM_WIDTH) << chosenProduct.name;
+		itemsOutput << setw(ITEM_WIDTH) << chosenProduct->name;
 		itemsOutput << setw(QUANTITY_WIDTH) << itemQuantity;
 		itemsOutput << right;
 		itemsOutput << fixed << setprecision(2) << setw(PRICE_WIDTH) << (unitPrice * itemQuantity);
@@ -341,6 +345,7 @@ void serveCustomer(bool &moreCustomers, vector<Product> &products, ofstream &rec
 	
 	
 	cin.ignore();
+	cout << endl;
 	moreCustomers = getYesNoInput("Do another customer? (enter Yes or No:) ");
 	
 }
