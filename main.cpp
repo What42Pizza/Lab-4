@@ -17,37 +17,59 @@ const double CONWAY_MUNICIPAL_TAX = 2.125;
 #include <vector>
 using namespace std;
 
+
+
+// custom types
+
+struct Product {
+	// the name of the product
+	string name;
+	// the price of the small variant
+	double smallPrice;
+	// the price of the medium variant
+	double mediumPrice;
+	// the price of the large variant
+	double largePrice;
+	// the quantity of this product in inventory
+	int inventoryCount;
+	// the amount of this product that has been taken from inventory by this program 
+	int amountTaken;
+};
+
+
+
+// processes a customer, asks for customer items, prints and writes receipt, etc
+void serveCustomer(bool &moreCustomers, vector<Product> &products, ofstream &receiptFile);
+
+// prompts the user for a yes/no input with the given prompt
+bool getYesNoInput(string prompt);
+
+// converts a string to lowercase
+// note: this edits the input string instead of returning a new string
+void toLower(string &str);
+
+
+
 void toLower(string &str) {
 	transform(str.begin(), str.end(), str.begin(), [](unsigned char c) {
         return std::tolower(c);
     });
 }
 
-// Mock menu:
-// Code    Product      Small (s)    Medium (m)    Large (l)
-// A       Something    $1.00        $1.00         $1.00
-// B       Something    $1.00        $1.00         $1.00
-// C       Something    $1.00        $1.00         $1.00
 
-struct Product {
-	string name;
-	double smallPrice;
-	double mediumPrice;
-	double largePrice;
-	int inventoryCount;
-	int amountTaken;
-};
 
 int main() {
+	
+	
+	
+	// open file objects
+	
 	ofstream receiptFile;
 	receiptFile.open("Receipt.txt");
-		if (!receiptFile.is_open()) {
+	if (!receiptFile.is_open()) {
 		cout << "Error: could not open file \"Receipt.txt\"";
 		return 1;
 	}
-
-
-	vector<Product> products;
 	
 	ifstream itemDatas;
 	itemDatas.open("Item Datas.txt");
@@ -55,6 +77,19 @@ int main() {
 		cout << "Error: could not open file \"Item Datas.txt\"";
 		return 1;
 	}
+	
+	ifstream inventory;
+	inventory.open("Inventory.txt");
+	if (!inventory.is_open()) {
+		cout << "Error: could not open file \"Inventory.txt\"";
+		return 1;
+	}
+	
+	
+	
+	// parse item datas file
+	
+	vector<Product> products;
 	
 	int i = 0;
 	while (true) {
@@ -73,12 +108,9 @@ int main() {
 	}
 	itemDatas.close();
 	
-	ifstream inventory;
-	inventory.open("Inventory.txt");
-	if (!inventory.is_open()) {
-		cout << "Error: could not open file \"Inventory.txt\"";
-		return 1;
-	}
+	
+	
+	// parse inventory file
 	
 	i = 0;
 	while (true) {
@@ -95,317 +127,14 @@ int main() {
 		i ++;
 	}
 	inventory.close();
-
+	
+	
+	
+	// main loop
+	
 	bool moreCustomers = true;
 	while (moreCustomers) {
-		
-		cout << "Customer name: ";
-		string customerName;
-		getline(cin, customerName);
-		
-		ostringstream itemsOutput;
-		bool addMoreItems = true;
-		double itemsTotal = 0.0;
-		while (addMoreItems) {
-			
-			int max_width = 5;
-			for (int i = 0; i < (int) products.size(); i ++) {
-				max_width = max(max_width, (int) products[i].name.length());
-			}
-			max_width += 3;
-			
-			cout << left << setw(max_width + 2) << "Drink" << "Small (s)   Medium (m)   Large (l)" << endl << setprecision(2) << fixed;
-			for (int i = 0; i < (int) products.size(); i ++) {
-				cout << (char) ('A' + i) << " " << left << setw(max_width) << products[i].name << "$" << products[i].smallPrice << "       " << "$" << products[i].mediumPrice << "        " << "$" << products[i].largePrice << endl;
-			}
-			
-			
-			
-			Product& chosenProduct = products[0];
-			
-			bool inputIsValid = false;
-			while (!inputIsValid) {
-				char itemChoice;
-				cout << "Select an item: ";
-				cin >> itemChoice;
-				switch (toupper(itemChoice)) {
-					case 'A':
-						chosenProduct = products[0];
-						inputIsValid = true;
-						break;
-					case 'B':
-						chosenProduct = products[1];
-						inputIsValid = true;
-						break;
-					case 'C':
-						chosenProduct = products[2];
-						inputIsValid = true;
-						break;
-					default:
-						inputIsValid = false;
-						cout << "Input is not valid" << endl;
-						break;
-				}
-			}
-			
-			inputIsValid = false;
-			char sizeChoice;
-			double unitPrice;
-			while (!inputIsValid) {
-				cout << "Select a size: ";
-				cin >> sizeChoice;
-				switch (toupper(sizeChoice)) {
-					case 'S':
-						unitPrice = chosenProduct.smallPrice;
-						inputIsValid = true;
-						break;
-					case 'M':
-						unitPrice = chosenProduct.mediumPrice;
-						inputIsValid = true;
-						break;
-					case 'L':
-						unitPrice = chosenProduct.largePrice;
-						inputIsValid = true;
-						break;
-					default:
-						inputIsValid = false;
-						cout << "Input is not valid" << endl;
-						break;
-				}
-			}
-			
-			
-			
-			cout << endl;
-			cout << "Item chosen: " << chosenProduct.name << " (" << ((char) toupper(sizeChoice)) << ") for $" << fixed << setprecision(2) << unitPrice << endl;
-			
-			cout << "Item Quantity: ";
-			int itemQuantity;
-			cin >> itemQuantity;
-			chosenProduct.inventoryCount -= itemQuantity;
-			chosenProduct.amountTaken += itemQuantity;
-		
-			itemsOutput << left;
-			itemsOutput << setw(ITEM_WIDTH) << chosenProduct.name;
-			itemsOutput << setw(QUANTITY_WIDTH) << itemQuantity;
-			itemsOutput << right;
-			itemsOutput << fixed << setprecision(2) << setw(PRICE_WIDTH) << (unitPrice * itemQuantity);
-			itemsOutput << fixed << setprecision(2) << setw(UNIT_PRICE_WIDTH) << unitPrice;
-			itemsOutput << left;
-			itemsOutput << endl;
-			
-			itemsTotal += unitPrice * itemQuantity;
-			
-			
-			
-			inputIsValid = false;
-			cin.ignore();
-			while (!inputIsValid) {
-				
-				cout << "Add another item? (enter Yes or No:) ";
-				string addAnotherItemString;
-				getline(cin, addAnotherItemString);
-				toLower(addAnotherItemString);
-				
-				if (addAnotherItemString == "yes") {
-					addMoreItems = true;
-					inputIsValid = true;
-				} else if (addAnotherItemString == "no") {
-					addMoreItems = false;
-					inputIsValid = true;
-				} else {
-					cout << "Input is not valid" << endl;
-					inputIsValid = false;
-				}
-				
-			}
-			
-		}
-		
-		
-		
-		bool inputIsValid = false;
-		bool isMember = false;
-		while (!inputIsValid) {
-			
-			cout << "Is Member? (enter Yes or No:) ";
-			string isMemberString;
-			getline(cin, isMemberString);
-			toLower(isMemberString);
-			
-			if (isMemberString == "yes") {
-				isMember = true;
-				inputIsValid = true;
-			} else if (isMemberString == "no") {
-				isMember = false;
-				inputIsValid = true;
-			} else {
-				cout << "Input is not valid" << endl;
-				inputIsValid = false;
-			}
-			
-		}
-
-
-		double subtotal = itemsTotal;
-		
-		double discount = 0.0;
-		if (isMember) discount = subtotal * MEMBER_DISCOUNT;
-		double afterMembership = subtotal - discount;
-		
-		double arkansasStateTax = subtotal * (ARKANSAS_STATE_TAX / 100.0);
-		double faulknerCountyTax = subtotal * (FAULKNER_COUNTY_TAX / 100.0);
-		double conwayMunicipalTax = subtotal * (CONWAY_MUNICIPAL_TAX / 100.0);
-		double afterTax = afterMembership + arkansasStateTax + faulknerCountyTax + conwayMunicipalTax;
-		
-		cout << endl;
-		cout << "Tip Selection		Amount" << endl;
-		cout << "A. 15%             $"<< fixed << setprecision(2) << afterTax * 0.15 << endl;
-		cout << "B. 20%             $"<< fixed << setprecision(2) << afterTax * 0.20 << endl;
-		cout << "C. 25%             $"<< fixed << setprecision(2) << afterTax * 0.25 << endl;
-		cout << "D. Custom Tip" << endl;
-		double tipAmount;
-		
-		inputIsValid = false;
-		while (!inputIsValid) {
-			char tipChoice;
-			cin >> tipChoice;
-			switch (toupper(tipChoice)) {
-				case 'A':
-					tipAmount = afterTax * 0.15;
-					inputIsValid = true;
-					break;
-				case 'B':
-					tipAmount = afterTax * 0.20;
-					inputIsValid = true;
-					break;
-				case 'C':
-					tipAmount = afterTax * 0.25;
-					inputIsValid = true;
-					break;
-				case 'D': 
-					cout << "Enter custom tip amount: $";
-					inputIsValid = true;
-					cin >> tipAmount;
-					break;
-				default:
-					cout << "Input is not valid" << endl;
-					inputIsValid = false;
-					break;
-			}
-		}
-
-		
-		
-		cout << endl;
-		cout << left;
-		
-		cout << "Receipt:" << endl;
-		int total_width = ITEM_WIDTH + QUANTITY_WIDTH + PRICE_WIDTH + UNIT_PRICE_WIDTH;
-			for (int i = 0; i < total_width; i++) {
-			cout << '-';
-		}
-		cout << endl;
-		cout << "Customer: " << customerName << endl;
-		cout << endl;
-		
-		cout << setw(ITEM_WIDTH) << "Item";
-		cout << setw(QUANTITY_WIDTH) << "Quantity";
-		cout << right;
-		cout << setw(PRICE_WIDTH) << "Price";
-		cout << setw(UNIT_PRICE_WIDTH) << "Unit Price";
-		cout << left;
-		cout << endl;
-		
-		cout << itemsOutput.str();
-		
-		cout << endl;
-		for (int i = 0; i < total_width; i++) {
-			cout << '-';
-		}
-		cout << endl;
-
-		int end_item_width = ITEM_WIDTH + QUANTITY_WIDTH;
-		cout << left << setw(end_item_width) << "Arkansas State Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << arkansasStateTax << endl;
-		cout << left << setw(end_item_width) << "Faulkner County Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << faulknerCountyTax << endl;
-		cout << left << setw(end_item_width) << "Conway Municipal Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << conwayMunicipalTax << endl;
-
-		double totalAmount = afterTax + tipAmount;
-		
-		int loyaltyPoints = totalAmount / 3; 
-		string loyaltyPointsString = "";
-		for (int i = 0; i < loyaltyPoints; i++) {
-			loyaltyPointsString += "*";
-		} 
-		
-		cout << left << setw(end_item_width) << "Subtotal" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << subtotal << endl;
-		cout << left << setw(end_item_width) << "After Membership" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << afterMembership << endl;
-		cout << left << setw(end_item_width) << "After Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << afterTax << endl;
-		cout << left << setw(end_item_width) << "Tip" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << tipAmount << endl;
-		cout << left << setw(end_item_width) << "Total" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << totalAmount << endl;
-		cout << left << setw(end_item_width) << "Loyalty Points" << right << setw(PRICE_WIDTH) << loyaltyPointsString << endl;
-		
-
-		receiptFile << "Receipt:" << endl;
-			for (int i = 0; i < total_width; i++) {
-			receiptFile << '-';
-		}
-
-		receiptFile << endl;
-		receiptFile << "Customer: " << customerName << endl;
-		receiptFile << endl;
-		
-		receiptFile << setw(ITEM_WIDTH) << "Item";
-		receiptFile << setw(QUANTITY_WIDTH) << "Quantity";
-		receiptFile << right;
-		receiptFile << setw(PRICE_WIDTH) << "Price";
-		receiptFile << setw(UNIT_PRICE_WIDTH) << "Unit Price";
-		receiptFile << left;
-		receiptFile << endl;
-		
-		receiptFile << itemsOutput.str();
-		
-		receiptFile << endl;
-		for (int i = 0; i < total_width; i++) {
-			receiptFile << '-';
-		}
-		receiptFile << endl;
-
-		receiptFile << left << setw(end_item_width) << "Arkansas State Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << arkansasStateTax << endl;
-		receiptFile << left << setw(end_item_width) << "Faulkner County Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << faulknerCountyTax << endl;
-		receiptFile << left << setw(end_item_width) << "Conway Municipal Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << conwayMunicipalTax << endl;
-
-		
-		
-		receiptFile << left << setw(end_item_width) << "Subtotal" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << subtotal << endl;
-		receiptFile << left << setw(end_item_width) << "After Membership" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << afterMembership << endl;
-		receiptFile << left << setw(end_item_width) << "After Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << afterTax << endl;
-		receiptFile << left << setw(end_item_width) << "Tip" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << tipAmount << endl;
-		receiptFile << left << setw(end_item_width) << "Total" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << totalAmount << endl;
-		receiptFile << left << setw(end_item_width) << "Loyalty Points" << right << setw(PRICE_WIDTH) << loyaltyPointsString << endl;
-		
-		inputIsValid = false;
-		cin.ignore();
-		while (!inputIsValid) {
-			
-			cout << "Do another customer? (enter Yes or No:) ";
-			string doAnotherCustomer;
-			getline(cin, doAnotherCustomer);
-			toLower(doAnotherCustomer);
-			
-			if (doAnotherCustomer == "yes") {
-				moreCustomers = true;
-				inputIsValid = true;
-			} else if (doAnotherCustomer == "no") {
-				moreCustomers = false;
-				inputIsValid = true;
-			} else {
-				cout << "Input is not valid" << endl;
-				inputIsValid = false;
-			}
-			
-		}
-
+		serveCustomer(moreCustomers, products, receiptFile);
 	}
 	
 	receiptFile.close();
@@ -438,11 +167,239 @@ int main() {
 	
 }
 
-/*
 
-subtotal = all items to pay for
-after_membership = subtotal * (1.0 - discount)
-after_tax = after_membership * (1.0 + tax)
-total = after_tax + tip
 
-*/
+void serveCustomer(bool &moreCustomers, vector<Product> &products, ofstream &receiptFile) {
+	
+	cout << "Customer name: ";
+	string customerName;
+	getline(cin, customerName);
+	
+	ostringstream itemsOutput;
+	bool addMoreItems = true;
+	double itemsTotal = 0.0;
+	while (addMoreItems) {
+		
+		int max_width = 5;
+		for (int i = 0; i < (int) products.size(); i ++) {
+			max_width = max(max_width, (int) products[i].name.length());
+		}
+		max_width += 3;
+		
+		cout << left << setw(max_width + 2) << "Drink" << "Small (s)   Medium (m)   Large (l)" << endl << setprecision(2) << fixed;
+		for (int i = 0; i < (int) products.size(); i ++) {
+			cout << (char) ('A' + i) << " " << left << setw(max_width) << products[i].name << "$" << products[i].smallPrice << "       " << "$" << products[i].mediumPrice << "        " << "$" << products[i].largePrice << endl;
+		}
+		
+		
+		
+		Product& chosenProduct = products[0];
+		
+		bool inputIsValid = false;
+		while (!inputIsValid) {
+			char itemChoice;
+			cout << "Select an item: ";
+			cin >> itemChoice;
+			switch (toupper(itemChoice)) {
+				case 'A':
+					chosenProduct = products[0];
+					inputIsValid = true;
+					break;
+				case 'B':
+					chosenProduct = products[1];
+					inputIsValid = true;
+					break;
+				case 'C':
+					chosenProduct = products[2];
+					inputIsValid = true;
+					break;
+				default:
+					inputIsValid = false;
+					cout << "Input is not valid" << endl;
+					break;
+			}
+		}
+		
+		inputIsValid = false;
+		char sizeChoice;
+		double unitPrice;
+		while (!inputIsValid) {
+			cout << "Select a size: ";
+			cin >> sizeChoice;
+			switch (toupper(sizeChoice)) {
+				case 'S':
+					unitPrice = chosenProduct.smallPrice;
+					inputIsValid = true;
+					break;
+				case 'M':
+					unitPrice = chosenProduct.mediumPrice;
+					inputIsValid = true;
+					break;
+				case 'L':
+					unitPrice = chosenProduct.largePrice;
+					inputIsValid = true;
+					break;
+				default:
+					inputIsValid = false;
+					cout << "Input is not valid" << endl;
+					break;
+			}
+		}
+		
+		
+		
+		cout << endl;
+		cout << "Item chosen: " << chosenProduct.name << " (" << ((char) toupper(sizeChoice)) << ") for $" << fixed << setprecision(2) << unitPrice << endl;
+		
+		cout << "Item Quantity: ";
+		int itemQuantity;
+		cin >> itemQuantity;
+		chosenProduct.inventoryCount -= itemQuantity;
+		chosenProduct.amountTaken += itemQuantity;
+	
+		itemsOutput << left;
+		itemsOutput << setw(ITEM_WIDTH) << chosenProduct.name;
+		itemsOutput << setw(QUANTITY_WIDTH) << itemQuantity;
+		itemsOutput << right;
+		itemsOutput << fixed << setprecision(2) << setw(PRICE_WIDTH) << (unitPrice * itemQuantity);
+		itemsOutput << fixed << setprecision(2) << setw(UNIT_PRICE_WIDTH) << unitPrice;
+		itemsOutput << left;
+		itemsOutput << endl;
+		
+		itemsTotal += unitPrice * itemQuantity;
+		
+		
+		
+		cin.ignore();
+		addMoreItems = getYesNoInput("Add another item? (enter Yes or No:) ");
+		
+	}
+	
+	
+	
+	bool isMember = getYesNoInput("Is Member? (enter Yes or No:) ");
+	
+	double subtotal = itemsTotal;
+	
+	double discount = 0.0;
+	if (isMember) discount = subtotal * MEMBER_DISCOUNT;
+	double afterMembership = subtotal - discount;
+	
+	double arkansasStateTax = subtotal * (ARKANSAS_STATE_TAX / 100.0);
+	double faulknerCountyTax = subtotal * (FAULKNER_COUNTY_TAX / 100.0);
+	double conwayMunicipalTax = subtotal * (CONWAY_MUNICIPAL_TAX / 100.0);
+	double afterTax = afterMembership + arkansasStateTax + faulknerCountyTax + conwayMunicipalTax;
+	
+	cout << endl;
+	cout << "Tip Selection		Amount" << endl;
+	cout << "A. 15%             $"<< fixed << setprecision(2) << afterTax * 0.15 << endl;
+	cout << "B. 20%             $"<< fixed << setprecision(2) << afterTax * 0.20 << endl;
+	cout << "C. 25%             $"<< fixed << setprecision(2) << afterTax * 0.25 << endl;
+	cout << "D. Custom Tip" << endl;
+	double tipAmount;
+	
+	bool inputIsValid = false;
+	while (!inputIsValid) {
+		char tipChoice;
+		cin >> tipChoice;
+		switch (toupper(tipChoice)) {
+			case 'A':
+				tipAmount = afterTax * 0.15;
+				inputIsValid = true;
+				break;
+			case 'B':
+				tipAmount = afterTax * 0.20;
+				inputIsValid = true;
+				break;
+			case 'C':
+				tipAmount = afterTax * 0.25;
+				inputIsValid = true;
+				break;
+			case 'D': 
+				cout << "Enter custom tip amount: $";
+				inputIsValid = true;
+				cin >> tipAmount;
+				break;
+			default:
+				cout << "Input is not valid" << endl;
+				inputIsValid = false;
+				break;
+		}
+	}
+
+	
+	
+	cout << endl;
+	cout << left;
+	
+	cout << "Receipt:" << endl;
+	int total_width = ITEM_WIDTH + QUANTITY_WIDTH + PRICE_WIDTH + UNIT_PRICE_WIDTH;
+		for (int i = 0; i < total_width; i++) {
+		cout << '-';
+	}
+	cout << endl;
+	cout << "Customer: " << customerName << endl;
+	cout << endl;
+	
+	cout << setw(ITEM_WIDTH) << "Item";
+	cout << setw(QUANTITY_WIDTH) << "Quantity";
+	cout << right;
+	cout << setw(PRICE_WIDTH) << "Price";
+	cout << setw(UNIT_PRICE_WIDTH) << "Unit Price";
+	cout << left;
+	cout << endl;
+	
+	cout << itemsOutput.str();
+	
+	cout << endl;
+	for (int i = 0; i < total_width; i++) {
+		cout << '-';
+	}
+	cout << endl;
+
+	int end_item_width = ITEM_WIDTH + QUANTITY_WIDTH;
+	cout << left << setw(end_item_width) << "Arkansas State Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << arkansasStateTax << endl;
+	cout << left << setw(end_item_width) << "Faulkner County Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << faulknerCountyTax << endl;
+	cout << left << setw(end_item_width) << "Conway Municipal Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << conwayMunicipalTax << endl;
+
+	double totalAmount = afterTax + tipAmount;
+	
+	int loyaltyPoints = totalAmount / 3; 
+	string loyaltyPointsString = "";
+	for (int i = 0; i < loyaltyPoints; i++) {
+		loyaltyPointsString += "*";
+	} 
+	
+	cout << left << setw(end_item_width) << "Subtotal" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << subtotal << endl;
+	cout << left << setw(end_item_width) << "After Membership" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << afterMembership << endl;
+	cout << left << setw(end_item_width) << "After Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << afterTax << endl;
+	cout << left << setw(end_item_width) << "Tip" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << tipAmount << endl;
+	cout << left << setw(end_item_width) << "Total" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << totalAmount << endl;
+	cout << left << setw(end_item_width) << "Loyalty Points" << right << setw(PRICE_WIDTH) << loyaltyPointsString << endl;
+	
+	
+	cin.ignore();
+	moreCustomers = getYesNoInput("Do another customer? (enter Yes or No:) ");
+	
+}
+
+
+
+bool getYesNoInput(string prompt) {
+	while (true) {
+		
+		cout << prompt;
+		string input;
+		getline(cin, input);
+		toLower(input);
+		
+		if (input == "yes" || input == "y" || input == "true" || input == "t" || input == "1") {
+			return true;
+		} else if (input == "no" || input == "n" || input == "false" || input == "f" || input == "0") {
+			return false;
+		} else {
+			cout << "Input is not valid" << endl;
+		}
+		
+	}
+}
