@@ -368,13 +368,17 @@ void serveCustomer(vector<Product> &products, ofstream &receiptFile) {
 void printReceipt(ostream &output, string customerName, string itemsOutput, double afterTax, double tipAmount, double subtotal, double afterMembership, double arkansasStateTax, double faulknerCountyTax, double conwayMunicipalTax) {
 	
 	int total_width = ITEM_WIDTH + QUANTITY_WIDTH + PRICE_WIDTH + UNIT_PRICE_WIDTH;
+	string separator;
 	for (int i = 0; i < total_width; i++) {
-		cout << '-';
+		separator += '-';
 	}
-	output << endl;
+	
+	// print header
+	output << separator << endl;
 	output << "Customer: " << customerName << endl;
 	output << endl;
 	
+	// print items
 	output << setw(ITEM_WIDTH) << "Item";
 	output << setw(QUANTITY_WIDTH) << "Quantity";
 	output << right;
@@ -386,30 +390,31 @@ void printReceipt(ostream &output, string customerName, string itemsOutput, doub
 	output << itemsOutput;
 	
 	output << endl;
-	for (int i = 0; i < total_width; i++) {
-		output << '-';
-	}
-	output << endl;
+	output << separator << endl;
 	
+	// print tax amounts
 	int end_item_width = ITEM_WIDTH + QUANTITY_WIDTH;
 	output << left << setw(end_item_width) << "Arkansas State Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << arkansasStateTax << endl;
 	output << left << setw(end_item_width) << "Faulkner County Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << faulknerCountyTax << endl;
 	output << left << setw(end_item_width) << "Conway Municipal Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << conwayMunicipalTax << endl;
 	
+	// get loyalty points amount
 	double totalAmount = afterTax + tipAmount;
-	
 	int loyaltyPoints = totalAmount / 3; 
 	string loyaltyPointsString = "";
 	for (int i = 0; i < loyaltyPoints; i++) {
 		loyaltyPointsString += "*";
 	} 
 	
+	// print totals and subtotals
 	output << left << setw(end_item_width) << "Subtotal" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << subtotal << endl;
 	output << left << setw(end_item_width) << "After Membership" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << afterMembership << endl;
 	output << left << setw(end_item_width) << "After Tax" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << afterTax << endl;
 	output << left << setw(end_item_width) << "Tip" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << tipAmount << endl;
 	output << left << setw(end_item_width) << "Total" << right << setw(PRICE_WIDTH) << fixed << setprecision(2) << totalAmount << endl;
 	output << left << setw(end_item_width) << "Loyalty Points" << right << setw(PRICE_WIDTH) << loyaltyPointsString << endl;
+	
+	output << separator << endl;
 	
 }
 
@@ -428,11 +433,13 @@ int getProductNamesWidth(vector<Product> &products) {
 bool getYesNoInput(string prompt) {
 	while (true) {
 		
+		// get input
 		cout << prompt;
 		string input;
 		getline(cin, input);
 		toLower(input);
 		
+		// check input
 		if (input == "yes" || input == "y" || input == "true" || input == "t" || input == "1") {
 			return true;
 		} else if (input == "no" || input == "n" || input == "false" || input == "f" || input == "0") {
